@@ -1,4 +1,4 @@
-{
+export default  {
   "expo": {
     "name": "sploot-walktracker",
     "slug": "sploot-walktracker",
@@ -24,7 +24,7 @@
       ],
       "config": {
         "googleMaps": {
-          "apiKey": "AIzaSyC-WGDOAN3ng3TpoDp37VGPEl20Zib8UgM"
+          "apiKey": process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY
         }
       }
     },

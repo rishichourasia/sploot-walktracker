@@ -47,13 +47,13 @@ export default function TabTwoScreen() {
 
   return (
     <ScrollView style={styles.container}>
-      <View style={styles.metricContainer}>
-        <View style={styles.metricBox}>
+      <View style={styles.displayContainer}>
+        <View style={styles.displayBox}>
           <Text style={styles.statValue}>{totalWalks}</Text>
           <Text style={styles.statLabel}>Total Walks</Text>
         </View>
 
-        <View style={styles.metricBox}>
+        <View style={styles.displayBox}>
           <Text style={styles.statValue}>{formatTime(totalTime)}</Text>
           <Text style={styles.statLabel}>Total Time</Text>
         </View>
@@ -114,12 +114,12 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 20,
   },
-  metricContainer: {
+  displayContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
     marginBottom: 20,
   },
-  metricBox: {
+  displayBox: {
     flex: 1,
     borderRadius: 8,
     borderWidth: 1,
