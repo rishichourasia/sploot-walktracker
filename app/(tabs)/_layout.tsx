@@ -4,6 +4,7 @@ import React from "react";
 import { HapticTab } from "@/components/HapticTab";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import TabBarBackground from "@/components/ui/TabBarBackground";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
 
 export default function TabLayout() {
   return (
@@ -23,6 +24,12 @@ export default function TabLayout() {
           backgroundColor: "white",
           borderTopWidth: 0,
         },
+        tabBarLabelStyle: {
+          textAlign: "center",
+        },
+        tabBarIconStyle: {
+          alignSelf: "center",
+        },
       }}
     >
       <Tabs.Screen
@@ -38,9 +45,9 @@ export default function TabLayout() {
       <Tabs.Screen
         name="explore"
         options={{
-          title: "Explore",
+          title: "Past Walks",
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="paperplane.fill" color={color} />
+            <FontAwesome name="paw" size={24} color={color} />
           ),
         }}
       />

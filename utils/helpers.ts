@@ -1,0 +1,48 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+const WALKS_KEY = 'saved_walks';
+
+export const saveWalk = async (pathArr: any[], timeElapsed: any, distance: any) =>  {
+    try {
+      const existingWalks = await getSavedWalks();
+      
+      const newWalk = {
+        pathArr,
+        timeElapsed,
+        distance
+      };
+
+      
+      const updatedWalks = [...existingWalks, newWalk];
+      
+      await AsyncStorage.setItem(WALKS_KEY, JSON.stringify(updatedWalks));
+      console.log('Walk saved successfully');
+    } catch (error) {
+      console.error('Error saving walk:', error);
+    }
+};
+
+export const getSavedWalks = async () => {
+  try {
+    const walksData = await AsyncStorage.getItem(WALKS_KEY);
+    return walksData ? JSON.parse(walksData) : [];
+  } catch (error) {
+    console.error('Error getting walks:', error);
+    return [];
+  }
+};
+
+export const clearAllWalks = async () => {
+    try {
+      await AsyncStorage.removeItem(WALKS_KEY);
+      console.log('All walks cleared');
+    } catch (error) {
+      console.error('Error clearing walks:', error);
+    }
+  };
+
+export const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}m ${secs}s`;
+};

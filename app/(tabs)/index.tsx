@@ -8,10 +8,11 @@ import {
 } from "react-native";
 
 import { ThemedView } from "@/components/ThemedView";
+import LottieView from "lottie-react-native";
+import React, { useEffect, useRef, useState } from "react";
 import MapView, { Polyline } from "react-native-maps";
 
-import React, { useEffect, useRef, useState } from "react";
-
+import { saveWalk } from "@/utils/helpers";
 import * as Location from "expo-location";
 
 interface LocationProps {
@@ -25,14 +26,47 @@ export default function HomeScreen() {
   const [location, setLocation] = useState<LocationProps | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [walkPath, setWalkPath] = useState<LocationProps[]>([]);
+  const [seconds, setSeconds] = useState(0);
+  const [isTracking, setIsTracking] = useState<boolean>(false);
+  const locationWatchId = useRef<any>(null);
   const mapRef = useRef<MapView>(null);
 
-  const [isTracking, setIsTracking] = useState<boolean>(false);
-  const [walkPath, setWalkPath] = useState<LocationProps[]>([]);
-  // const [walkDistance, setWalkDistance] = useState<number>(0);
-  // const [walkDuration, setWalkDuration] = useState<number>(0);
-  // const [startTime, setStartTime] = useState<number | null>(null);
-  const locationWatchId = useRef<any>(null);
+  const walkCompleteActions = async () => {
+    await saveWalk(walkPath, seconds, 0);
+    Alert.alert(
+      "Walk Completed!",
+      "Your tracked walk has been saved. view past walk screen for more details. \n \n Time: " +
+        formatTime(seconds),
+      [{ text: "OK" }],
+      { userInterfaceStyle: "light" }
+    );
+    setSeconds(0);
+  };
+
+  useEffect(() => {
+    let interval = null;
+
+    if (isTracking) {
+      interval = setInterval(() => {
+        setSeconds((seconds) => seconds + 1);
+      }, 1000);
+    } else if (walkPath.length > 0) {
+      interval = null;
+      walkCompleteActions();
+    }
+
+    return () => {
+      clearInterval(interval as number);
+      setSeconds(0);
+    };
+  }, [isTracking]);
+
+  const formatTime = (totalSeconds: number) => {
+    const min = Math.floor(totalSeconds / 60);
+    const sec = totalSeconds % 60;
+    return `${min}:${sec.toString().padStart(2, "0")}`;
+  };
 
   const getCurrentLocation = async () => {
     try {
@@ -41,7 +75,7 @@ export default function HomeScreen() {
       if (status !== "granted") {
         Alert.alert(
           "Permission to access location was denied",
-          "Please enable location permissions in your settings.",
+          "Please enable location permissions in your settings to track walks.",
           [
             {
               text: "OK",
@@ -73,6 +107,7 @@ export default function HomeScreen() {
       setLoading(false);
     }
   };
+
   const startWalk = async () => {
     if (!location) {
       Alert.alert("Error", "Cannot start walk without location");
@@ -159,7 +194,7 @@ export default function HomeScreen() {
           showsCompass={true}
           showsScale={true}
           onMapReady={() => {
-            console.log("Map is ready");
+            console.log("Map loaded");
           }}
         >
           {walkPath.length > 1 && (
@@ -178,30 +213,58 @@ export default function HomeScreen() {
       )}
       <ThemedView>
         <ThemedView style={styles.trackContainer}>
-          <Text style={styles.trackText}>
-            Ready to track your dog&apos;s walk?
-          </Text>
-          <View style={styles.reminderBox}>
-            <Text style={styles.reminderTitle}>Before you go:</Text>
-            <View style={styles.reminderItem}>
-              <Text style={styles.bulletPoint}>•</Text>
-              <Text style={styles.reminderText}>
-                Make sure your dog is wearing a leash
-              </Text>
-            </View>
-            <View style={styles.reminderItem}>
-              <Text style={styles.bulletPoint}>•</Text>
-              <Text style={styles.reminderText}>
-                Bring water and waste bags
-              </Text>
-            </View>
-            <View style={styles.reminderItem}>
-              <Text style={styles.bulletPoint}>•</Text>
-              <Text style={styles.reminderText}>
-                Check the weather before heading out
-              </Text>
-            </View>
+          <View style={styles.trackTextContainer}>
+            <Text style={styles.trackText}>
+              {!isTracking
+                ? "Ready to track your dog's walk?"
+                : "Walk in progress"}
+            </Text>
+            {isTracking && (
+              <LottieView
+                source={{
+                  uri: "https://lottie.host/b8042492-6d37-409b-956b-4e68ea1a6e10/23awwsqctY.lottie",
+                }}
+                autoPlay
+                loop
+                style={{ width: 27, height: 27 }}
+              />
+            )}
           </View>
+          {!isTracking ? (
+            <View style={styles.reminderBox}>
+              <Text style={styles.reminderTitle}>Before you go:</Text>
+              <View style={styles.reminderItem}>
+                <Text style={styles.bulletPoint}>•</Text>
+                <Text style={styles.reminderText}>
+                  Make sure your dog is wearing a leash
+                </Text>
+              </View>
+              <View style={styles.reminderItem}>
+                <Text style={styles.bulletPoint}>•</Text>
+                <Text style={styles.reminderText}>
+                  Bring water and waste bags
+                </Text>
+              </View>
+              <View style={styles.reminderItem}>
+                <Text style={styles.bulletPoint}>•</Text>
+                <Text style={styles.reminderText}>
+                  Check the weather before heading out
+                </Text>
+              </View>
+            </View>
+          ) : (
+            <View style={styles.statsContainer}>
+              <View style={styles.statBox}>
+                <Text style={styles.statTitle}>Time Elapsed</Text>
+                <Text style={styles.statValue}>{formatTime(seconds)}</Text>
+              </View>
+              <View style={styles.statBox}>
+                <Text style={styles.statTitle}>Distance</Text>
+                <Text style={styles.statValue}>0.0 KM</Text>
+              </View>
+            </View>
+          )}
+
           <TouchableOpacity
             style={styles.trackButton}
             onPress={toggleWalkTracking}
@@ -275,7 +338,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   reminderBox: {
-    marginTop: 20,
+    marginTop: 5,
     padding: 15,
     borderRadius: 8,
     backgroundColor: "white",
@@ -303,5 +366,37 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#555",
     flex: 1,
+  },
+  statsContainer: {
+    marginTop: 5,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+    marginBottom: 35,
+  },
+  statBox: {
+    width: "48%",
+    padding: 15,
+    borderRadius: 8,
+    backgroundColor: "white",
+    alignItems: "center",
+    marginTop: 5,
+    borderWidth: 1,
+    borderColor: "#E5E5E5",
+  },
+  statTitle: {
+    fontSize: 14,
+    color: "#777",
+    marginBottom: 5,
+  },
+  statValue: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#333",
+  },
+  trackTextContainer: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 5,
   },
 });
