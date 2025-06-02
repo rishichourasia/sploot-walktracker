@@ -81,6 +81,14 @@ export default function TabTwoScreen() {
                     {formatTime(walk.timeElapsed)}
                   </Text>
                 </View>
+                <View style={styles.walkStat}>
+                  <MaterialIcons name="calendar-today" size={16} color="#666" />
+                  <Text style={styles.walkStatText}>{walk.formattedDate}</Text>
+                </View>
+                <View style={styles.walkStat}>
+                  <MaterialIcons name="access-time" size={16} color="#666" />
+                  <Text style={styles.walkStatText}>{walk.formattedTime}</Text>
+                </View>
               </View>
             </View>
             <MaterialIcons name="chevron-right" size={24} color="#CCC" />
@@ -192,6 +200,7 @@ const styles = StyleSheet.create({
   walkStats: {
     flexDirection: "row",
     alignItems: "center",
+    gap: 0,
   },
   walkStat: {
     flexDirection: "row",

@@ -34,9 +34,11 @@ export default function HomeScreen() {
         setLoading(false);
         return;
       }
+
       const currentLocation = await Location.getCurrentPositionAsync({
         accuracy: Location.Accuracy.High,
       });
+
       const { latitude, longitude } = currentLocation.coords;
       setLocation({
         latitude,
