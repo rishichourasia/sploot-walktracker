@@ -33,7 +33,7 @@ export default function TabTwoScreen() {
 
   const handleClearHistory = async () => {
     await clearAllWalks();
-    refreshSavedWalks(); // Refresh data after clearing
+    refreshSavedWalks();
   };
 
   if (isLoading) {
@@ -62,7 +62,7 @@ export default function TabTwoScreen() {
       <View style={styles.pastWalksContainer}>
         {walksToDisplay.map((walk, i) => (
           <TouchableOpacity
-            key={walk.timeElapsed + i}
+            key={i + 1}
             style={styles.walkCard}
             onPress={() => {
               setTrackedPaths(walk.pathArr);
@@ -86,17 +86,16 @@ export default function TabTwoScreen() {
             <MaterialIcons name="chevron-right" size={24} color="#CCC" />
           </TouchableOpacity>
         ))}
-        {walksToDisplay.length === 0 && (
+        {walksToDisplay.length === 0 ? (
           <View style={styles.emptyState}>
             <Text style={styles.emptyStateText}>No walks recorded yet</Text>
           </View>
-        )}
-        {walksToDisplay.length && (
+        ) : (
           <TouchableOpacity
-            style={styles.clearHistoryButton}
+            style={styles.deleteBtn}
             onPress={handleClearHistory}
           >
-            <Text style={styles.clearHistoryText}>Clear past walks</Text>
+            <Text style={styles.deleteBtnText}>Clear past walks</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -212,14 +211,15 @@ const styles = StyleSheet.create({
     color: "#999",
     fontSize: 16,
   },
-  clearHistoryButton: {
+  deleteBtn: {
     backgroundColor: "#FF7001",
     padding: 12,
     borderRadius: 8,
     alignItems: "center",
     marginTop: 16,
+    marginBottom: 35,
   },
-  clearHistoryText: {
+  deleteBtnText: {
     color: "#fff",
     fontSize: 16,
     fontWeight: "bold",

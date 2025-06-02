@@ -2,17 +2,15 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const WALKS_KEY = 'saved_walks';
 
-export const saveWalk = async (pathArr: any[], timeElapsed: any, distance: any) =>  {
+export const saveWalk = async (pathArr: any[], timeElapsed: any) =>  {
     try {
       const existingWalks = await getSavedWalks();
       
       const newWalk = {
         pathArr,
         timeElapsed,
-        distance
       };
 
-      
       const updatedWalks = [...existingWalks, newWalk];
       
       await AsyncStorage.setItem(WALKS_KEY, JSON.stringify(updatedWalks));

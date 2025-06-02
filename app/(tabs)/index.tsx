@@ -9,7 +9,7 @@ import {
 
 import { ThemedView } from "@/components/ThemedView";
 import LottieView from "lottie-react-native";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import MapView, { Polyline } from "react-native-maps";
 
 import { saveWalk } from "@/utils/helpers";
@@ -29,11 +29,9 @@ export default function HomeScreen() {
   const [walkPath, setWalkPath] = useState<LocationProps[]>([]);
   const [seconds, setSeconds] = useState(0);
   const [isTracking, setIsTracking] = useState<boolean>(false);
-  const locationWatchId = useRef<any>(null);
-  const mapRef = useRef<MapView>(null);
 
   const walkCompleteActions = async () => {
-    await saveWalk(walkPath, seconds, 0);
+    await saveWalk(walkPath, seconds);
     Alert.alert(
       "Walk Completed!",
       "Your tracked walk has been saved. view past walk screen for more details. \n \n Time: " +
@@ -41,6 +39,7 @@ export default function HomeScreen() {
       [{ text: "OK" }],
       { userInterfaceStyle: "light" }
     );
+    setWalkPath([location as LocationProps]);
     setSeconds(0);
   };
 
@@ -114,12 +113,11 @@ export default function HomeScreen() {
       return;
     }
 
-    // Clear previous path if any
     setWalkPath([location]);
     setIsTracking(true);
 
     // Start watching position changes
-    locationWatchId.current = await Location.watchPositionAsync(
+    await Location.watchPositionAsync(
       {
         accuracy: Location.Accuracy.BestForNavigation,
         distanceInterval: 3,
@@ -145,10 +143,6 @@ export default function HomeScreen() {
 
   // Stop tracking the walk
   const stopWalk = () => {
-    if (locationWatchId.current) {
-      locationWatchId.current.remove();
-      locationWatchId.current = null;
-    }
     setIsTracking(false);
   };
 
@@ -185,7 +179,6 @@ export default function HomeScreen() {
     <View style={styles.container}>
       {location && (
         <MapView
-          ref={mapRef}
           style={styles.map}
           initialRegion={location as LocationProps}
           showsUserLocation={true}
@@ -257,10 +250,6 @@ export default function HomeScreen() {
               <View style={styles.statBox}>
                 <Text style={styles.statTitle}>Time Elapsed</Text>
                 <Text style={styles.statValue}>{formatTime(seconds)}</Text>
-              </View>
-              <View style={styles.statBox}>
-                <Text style={styles.statTitle}>Distance</Text>
-                <Text style={styles.statValue}>0.0 KM</Text>
               </View>
             </View>
           )}
@@ -370,7 +359,7 @@ const styles = StyleSheet.create({
   statsContainer: {
     marginTop: 5,
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "center",
     width: "100%",
     marginBottom: 35,
   },
